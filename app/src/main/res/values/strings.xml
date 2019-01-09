@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">PageViewer</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Page Viewer</string>
+    <string name="nav_header_subtitle">394726202@qq.com</string>
+    <string name="nav_header_desc">Page Viewer designed by xinjinshao</string>
+    <string name="menu_download_pic">Download Pic</string>
+    <string name="menu_star">Star Set</string>
+    <string name="menu_delete_set">Delete Set</string>
+    <string name="star_success">Star Success</string>
+    <string name="delete_star_success">Delete Star Success</string>
+    <string name="action_search">Search</string>
+    <string name="star_set">Star</string>
+    <string name="mhxxoo_site">Mhxxoo</string>
+    <string name="semanhua_site">Semanhua</string>
+    <string name="zhuotu_site">Zhuotu</string>
+</resources>

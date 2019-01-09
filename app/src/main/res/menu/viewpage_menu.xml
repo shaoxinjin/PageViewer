@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/viewpage_download_pic"
+        android:title="@string/menu_download_pic" >
+    </item>
+    <item
+        android:id="@+id/viewpage_star"
+        android:title="@string/menu_star" >
+    </item>
+</menu>

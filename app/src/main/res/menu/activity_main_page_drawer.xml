@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <item
+        android:id="@+id/nav_star"
+        android:icon="@drawable/ic_star"
+        android:title="@string/star_set" >
+    </item>
+    <item
+        android:id="@+id/nav_mhxxoo"
+        android:icon="@drawable/ic_sites"
+        android:title="@string/mhxxoo_site" >
+    </item>
+    <item
+        android:id="@+id/nav_semanhua"
+        android:icon="@drawable/ic_sites"
+        android:title="@string/semanhua_site" >
+    </item>
+    <item
+        android:id="@+id/nav_zhuotu"
+        android:icon="@drawable/ic_sites"
+        android:title="@string/zhuotu_site" >
+    </item>
+</menu>

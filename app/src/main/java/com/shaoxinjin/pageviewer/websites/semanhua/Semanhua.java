@@ -25,7 +25,7 @@ public class Semanhua extends BaseWebOperation {
 
     @Override
     public void initWebInfo() {
-        URL_BASE = "http://m.wujiecaola.net";
+        URL_BASE = "https://m.wujiecaola.net";
         URL_END = ".html";
         mSectionInfo = new SectionInfo[]{
                 new SectionInfo("/shaonv/list_6_", 1, 0),

@@ -8,12 +8,10 @@
     tools:context=".MainPage"
     tools:showIn="@layout/app_bar_main_page">
 
-    <com.shaoxinjin.pageviewer.AutoGridView
+    <android.support.v7.widget.RecyclerView
         android:id="@+id/content_grid_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:numColumns="@integer/grid_columns"
-        android:stretchMode="columnWidth">
-    </com.shaoxinjin.pageviewer.AutoGridView>
+        android:layout_height="match_parent">
+    </android.support.v7.widget.RecyclerView>
 
 </android.support.constraint.ConstraintLayout>

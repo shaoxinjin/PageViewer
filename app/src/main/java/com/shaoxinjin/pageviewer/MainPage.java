@@ -11,7 +11,9 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -20,13 +22,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.shaoxinjin.pageviewer.db.DbManager;
 import com.shaoxinjin.pageviewer.websites.Star;
 import com.shaoxinjin.pageviewer.websites.WebOperation;
@@ -51,7 +49,7 @@ public class MainPage extends AppCompatActivity
     public static final String TYPE_KEY = "type_key";
     public static final String CLASS_KEY = "class_key";
 
-    private GridViewAdapter mGridViewAdapter;
+    private RecyclerViewAdapter mGridViewAdapter;
     private ArrayList<HashMap<String, String>> mList = new ArrayList<>();
     private int mCurrentID;
     private WebOperation mWebOperation;
@@ -131,8 +129,8 @@ public class MainPage extends AppCompatActivity
         return true;
     }
 
-    private boolean isStarPage() {
-        return mCurrentID == R.id.nav_star;
+    private boolean isNotStarPage() {
+        return mCurrentID != R.id.nav_star;
     }
 
     private String getStringById(int id) {
@@ -162,7 +160,7 @@ public class MainPage extends AppCompatActivity
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
-                if (mWebOperation != null && !isStarPage()) {
+                if (mWebOperation != null && isNotStarPage()) {
                     inSearch = true;
                     mList.clear();
                     mGridViewAdapter.notifyDataSetChanged();
@@ -179,66 +177,27 @@ public class MainPage extends AppCompatActivity
     }
 
     private void initGridView() {
-        AutoGridView mGridView = findViewById(R.id.content_grid_view);
-        mGridViewAdapter = new GridViewAdapter(MainPage.this);
+        RecyclerView mGridView = findViewById(R.id.content_grid_view);
+        mGridViewAdapter = new RecyclerViewAdapter(MainPage.this);
         mGridView.setAdapter(mGridViewAdapter);
-        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+        int column = getResources().getInteger(R.integer.grid_columns);
+        final StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(column, StaggeredGridLayoutManager.VERTICAL);
+        mGridView.setLayoutManager(layoutManager);
+        mGridView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                if (!inSearch && !isStarPage()) {
-                    if (view.getLastVisiblePosition() == view.getCount() - 1) {
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (!inSearch && isNotStarPage()) {
+                    if (!recyclerView.canScrollVertically(-1)) {
                         mWebOperation.updatePage();
                     }
                 }
             }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-            }
-        });
-        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                HashMap<String, String> map = mList.get(position);
-                if (map != null) {
-                    Intent intent = new Intent(MainPage.this, ViewPage.class);
-                    intent.putExtra(TYPE_KEY, getStringById(mCurrentID));
-                    intent.putExtra(TEXT_KEY, mList.get(position).get(TEXT_KEY));
-                    intent.putExtra(URL_KEY, mList.get(position).get(URL_KEY));
-                    WebOperationView webOperationView;
-                    webOperationView = webOperationMap.get(mList.get(position).get(TYPE_KEY)).getViewWebOperation();
-                    intent.putExtra(CLASS_KEY, webOperationView);
-                    startActivity(intent);
-                }
-            }
         });
         registerForContextMenu(mGridView);
-        mGridView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
-            @Override
-            public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-                if (isStarPage()) {
-                    getMenuInflater().inflate(R.menu.mainpage_menu, menu);
-                }
-            }
-        });
         if (mThreadPoolExecutor == null) {
             mThreadPoolExecutor = new ThreadPoolExecutor(50, 200, 5,
                     TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(1024));
         }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
-        int menuItemIndex = item.getItemId();
-        Log.d(TAG, "menuItem is " + menuItemIndex);
-        switch (menuItemIndex) {
-            case R.id.mainpage_delete_set:
-                deleteStarSet(info.position);
-                break;
-        }
-        return true;
     }
 
     private void deleteStarSet(int index) {
@@ -252,56 +211,95 @@ public class MainPage extends AppCompatActivity
         toast.show();
     }
 
-    class GridViewAdapter extends BaseAdapter {
+    class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.RecyclerViewHolder> {
         private Context mAdapterContext;
 
-        private GridViewAdapter(Context context) {
+        private RecyclerViewAdapter(Context context) {
             mAdapterContext = context;
         }
 
         @Override
-        public int getCount() {
+        public @NonNull RecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(mAdapterContext).inflate(R.layout.grid_item, parent, false);
+            return new RecyclerViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull RecyclerViewHolder viewHolder, int position) {
+            HashMap<String, String> map = mList.get(position);
+            if (map == null) {
+                Log.d(TAG, "map is null");
+                return;
+            }
+            String imageData = map.get(IMAGE_KEY);
+            String textData = map.get(TEXT_KEY);
+
+            Util.setPicFromUrl(MainPage.this, imageData, viewHolder.imageView);
+            viewHolder.textView.setText(textData);
+
+            setOnClickListener(viewHolder, position);
+            setMenuListener(viewHolder, position);
+        }
+
+        private void setOnClickListener(RecyclerViewHolder viewHolder, final int pos) {
+            viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    HashMap<String, String> map = mList.get(pos);
+                    if (map != null) {
+                        Intent intent = new Intent(MainPage.this, ViewPage.class);
+                        intent.putExtra(TYPE_KEY, getStringById(mCurrentID));
+                        intent.putExtra(TEXT_KEY, mList.get(pos).get(TEXT_KEY));
+                        intent.putExtra(URL_KEY, mList.get(pos).get(URL_KEY));
+                        WebOperationView webOperationView;
+                        webOperationView = webOperationMap.get(mList.get(pos).get(TYPE_KEY)).getViewWebOperation();
+                        intent.putExtra(CLASS_KEY, webOperationView);
+                        startActivity(intent);
+                    }
+                }
+            });
+        }
+
+        private void setMenuListener(RecyclerViewHolder viewHolder, final int pos) {
+            viewHolder.itemView.setOnCreateContextMenuListener(new View.OnCreateContextMenuListener() {
+                @Override
+                public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+                    if (isNotStarPage()) {
+                        return;
+                    }
+                    getMenuInflater().inflate(R.menu.mainpage_menu, menu);
+                    for (int index = 0; index < menu.size(); index++) {
+                        MenuItem item = menu.getItem(index);
+                        if (item.getItemId() == R.id.mainpage_delete_set) {
+                            item.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                                @Override
+                                public boolean onMenuItemClick(MenuItem item) {
+                                    deleteStarSet(pos);
+                                    return false;
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
             return mList.size();
         }
 
-        @Override
-        public Object getItem(int position) {
-            return mList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            GridViewHolder viewHolder;
-            if (convertView == null) {
-                viewHolder = new GridViewHolder();
-                convertView = LayoutInflater.from(mAdapterContext).inflate(R.layout.grid_item, null);
-                viewHolder.imageView = convertView.findViewById(R.id.image_item);
-                viewHolder.textView = convertView.findViewById(R.id.text_item);
-                convertView.setTag(viewHolder);
-            } else {
-                viewHolder = (GridViewHolder) convertView.getTag();
-            }
-
-            HashMap<String, String> map = mList.get(position);
-            if (map != null) {
-                String imageData = map.get(IMAGE_KEY);
-                String textData = map.get(TEXT_KEY);
-
-                Util.setPicFromUrl(MainPage.this, imageData, viewHolder.imageView);
-                viewHolder.textView.setText(textData);
-            }
-
-            return convertView;
-        }
-
-        class GridViewHolder {
+        class RecyclerViewHolder extends RecyclerView.ViewHolder {
+            private View itemView;
             private ImageView imageView;
             private TextView textView;
+
+            RecyclerViewHolder(View view) {
+                super(view);
+                itemView = view;
+                imageView = view.findViewById(R.id.image_item);
+                textView = view.findViewById(R.id.text_item);
+            }
         }
     }
 

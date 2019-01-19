@@ -49,7 +49,7 @@ public class MainPage extends AppCompatActivity
     public static final String TYPE_KEY = "type_key";
     public static final String CLASS_KEY = "class_key";
 
-    private RecyclerViewAdapter mGridViewAdapter;
+    private RecyclerViewAdapter mRecyclerViewAdapter;
     private ArrayList<HashMap<String, String>> mList = new ArrayList<>();
     private int mCurrentID;
     private WebOperation mWebOperation;
@@ -89,7 +89,7 @@ public class MainPage extends AppCompatActivity
             if (mWebOperation != null) {
                 inSearch = false;
                 mList.clear();
-                mGridViewAdapter.notifyDataSetChanged();
+                mRecyclerViewAdapter.notifyDataSetChanged();
                 mWebOperation.updatePage();
             }
         } else {
@@ -116,7 +116,7 @@ public class MainPage extends AppCompatActivity
         }
         inSearch = false;
         mList.clear();
-        mGridViewAdapter.notifyDataSetChanged();
+        mRecyclerViewAdapter.notifyDataSetChanged();
 
         mCurrentID = item.getItemId();
 
@@ -163,7 +163,7 @@ public class MainPage extends AppCompatActivity
                 if (mWebOperation != null && isNotStarPage()) {
                     inSearch = true;
                     mList.clear();
-                    mGridViewAdapter.notifyDataSetChanged();
+                    mRecyclerViewAdapter.notifyDataSetChanged();
                     mWebOperation.searchPage(s);
                 }
                 return false;
@@ -177,13 +177,13 @@ public class MainPage extends AppCompatActivity
     }
 
     private void initGridView() {
-        RecyclerView mGridView = findViewById(R.id.content_grid_view);
-        mGridViewAdapter = new RecyclerViewAdapter(MainPage.this);
-        mGridView.setAdapter(mGridViewAdapter);
+        RecyclerView recyclerView = findViewById(R.id.content_grid_view);
+        mRecyclerViewAdapter = new RecyclerViewAdapter(MainPage.this);
+        recyclerView.setAdapter(mRecyclerViewAdapter);
         int column = getResources().getInteger(R.integer.grid_columns);
         final StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(column, StaggeredGridLayoutManager.VERTICAL);
-        mGridView.setLayoutManager(layoutManager);
-        mGridView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 if (!inSearch && isNotStarPage()) {
@@ -193,7 +193,7 @@ public class MainPage extends AppCompatActivity
                 }
             }
         });
-        registerForContextMenu(mGridView);
+        registerForContextMenu(recyclerView);
         if (mThreadPoolExecutor == null) {
             mThreadPoolExecutor = new ThreadPoolExecutor(50, 200, 5,
                     TimeUnit.SECONDS, new LinkedBlockingDeque<Runnable>(1024));
@@ -205,7 +205,7 @@ public class MainPage extends AppCompatActivity
         dbManager.deleteRecord(mList.get(index).get(URL_KEY));
 
         mList.remove(mList.get(index));
-        mGridViewAdapter.notifyDataSetChanged();
+        mRecyclerViewAdapter.notifyDataSetChanged();
 
         Toast toast = Toast.makeText(this, getResources().getString(R.string.delete_star_success), Toast.LENGTH_SHORT);
         toast.show();
@@ -308,7 +308,7 @@ public class MainPage extends AppCompatActivity
             @Override
             public void run() {
                 mList.addAll(list);
-                mGridViewAdapter.notifyDataSetChanged();
+                mRecyclerViewAdapter.notifyDataSetChanged();
             }
         });
     }

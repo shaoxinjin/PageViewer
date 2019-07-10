@@ -23,14 +23,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.shaoxinjin.pageviewer.db.DbManager;
 import com.shaoxinjin.pageviewer.websites.Star;
 import com.shaoxinjin.pageviewer.websites.WebOperation;
 import com.shaoxinjin.pageviewer.websites.WebOperationView;
+import com.shaoxinjin.pageviewer.websites.Wuzhi.Wuzhi;
 import com.shaoxinjin.pageviewer.websites.mhxxoo.Mhxxoo;
 import com.shaoxinjin.pageviewer.websites.semanhua.Semanhua;
+import com.shaoxinjin.pageviewer.websites.xixi.Xixi;
 import com.shaoxinjin.pageviewer.websites.zhuotu.Zhuotu;
 
 import java.util.ArrayList;
@@ -89,6 +92,7 @@ public class MainPage extends AppCompatActivity
             if (mWebOperation != null) {
                 inSearch = false;
                 mList.clear();
+                updateSearchPercentage(0);
                 mRecyclerViewAdapter.notifyDataSetChanged();
                 mWebOperation.updatePage();
             }
@@ -107,7 +111,6 @@ public class MainPage extends AppCompatActivity
         return true;
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
@@ -117,12 +120,15 @@ public class MainPage extends AppCompatActivity
         inSearch = false;
         mList.clear();
         mRecyclerViewAdapter.notifyDataSetChanged();
+        updateSearchPercentage(0);
 
         mCurrentID = item.getItemId();
 
         Log.d(TAG, "current id is " + mCurrentID);
         mWebOperation = webOperationMap.get(getStringById(mCurrentID));
-        mWebOperation.updatePage();
+        if (mWebOperation != null) {
+            mWebOperation.updatePage();
+        }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -143,6 +149,10 @@ public class MainPage extends AppCompatActivity
                 return Semanhua.class.getSimpleName();
             case R.id.nav_zhuotu:
                 return Zhuotu.class.getSimpleName();
+            case R.id.nav_xixi:
+                return Xixi.class.getSimpleName();
+            case R.id.nav_wuzhi:
+                return Wuzhi.class.getSimpleName();
         }
         return "";
     }
@@ -153,6 +163,8 @@ public class MainPage extends AppCompatActivity
         webOperationMap.put(Mhxxoo.class.getSimpleName(), new Mhxxoo(MainPage.this, mThreadPoolExecutor));
         webOperationMap.put(Semanhua.class.getSimpleName(), new Semanhua(MainPage.this, mThreadPoolExecutor));
         webOperationMap.put(Zhuotu.class.getSimpleName(), new Zhuotu(MainPage.this, mThreadPoolExecutor));
+        webOperationMap.put(Xixi.class.getSimpleName(), new Xixi(MainPage.this, mThreadPoolExecutor));
+        webOperationMap.put(Wuzhi.class.getSimpleName(), new Wuzhi(MainPage.this, mThreadPoolExecutor));
     }
 
     private void initSearchView(MenuItem menuItem) {
@@ -186,8 +198,10 @@ public class MainPage extends AppCompatActivity
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                if (!inSearch && isNotStarPage()) {
+                if (!inSearch && isNotStarPage() && mWebOperation != null) {
+                    Log.d(TAG, "onScrollStateChanged");
                     if (!recyclerView.canScrollVertically(-1)) {
+                        Log.d(TAG, "onScrollStateChanged updatePage");
                         mWebOperation.updatePage();
                     }
                 }
@@ -216,6 +230,7 @@ public class MainPage extends AppCompatActivity
 
         private RecyclerViewAdapter(Context context) {
             mAdapterContext = context;
+            setHasStableIds(true);
         }
 
         @Override
@@ -234,8 +249,10 @@ public class MainPage extends AppCompatActivity
             String imageData = map.get(IMAGE_KEY);
             String textData = map.get(TEXT_KEY);
 
-            Util.setPicFromUrl(MainPage.this, imageData, viewHolder.imageView);
-            viewHolder.textView.setText(textData);
+            if (imageData != null && textData != null) {
+                Util.setPicFromUrl(MainPage.this, imageData, viewHolder.imageView);
+                viewHolder.textView.setText(textData);
+            }
 
             setOnClickListener(viewHolder, position);
             setMenuListener(viewHolder, position);
@@ -246,16 +263,20 @@ public class MainPage extends AppCompatActivity
                 @Override
                 public void onClick(View v) {
                     HashMap<String, String> map = mList.get(pos);
-                    if (map != null) {
-                        Intent intent = new Intent(MainPage.this, ViewPage.class);
-                        intent.putExtra(TYPE_KEY, getStringById(mCurrentID));
-                        intent.putExtra(TEXT_KEY, mList.get(pos).get(TEXT_KEY));
-                        intent.putExtra(URL_KEY, mList.get(pos).get(URL_KEY));
-                        WebOperationView webOperationView;
-                        webOperationView = webOperationMap.get(mList.get(pos).get(TYPE_KEY)).getViewWebOperation();
-                        intent.putExtra(CLASS_KEY, webOperationView);
-                        startActivity(intent);
+                    if (map == null) {
+                        return;
                     }
+                    WebOperation webOperation = webOperationMap.get(mList.get(pos).get(TYPE_KEY));
+                    if (webOperation == null) {
+                        return;
+                    }
+                    WebOperationView webOperationView= webOperation.getViewWebOperation();
+                    Intent intent = new Intent(MainPage.this, ViewPage.class);
+                    intent.putExtra(TYPE_KEY, getStringById(mCurrentID));
+                    intent.putExtra(TEXT_KEY, mList.get(pos).get(TEXT_KEY));
+                    intent.putExtra(URL_KEY, mList.get(pos).get(URL_KEY));
+                    intent.putExtra(CLASS_KEY, webOperationView);
+                    startActivity(intent);
                 }
             });
         }
@@ -289,6 +310,11 @@ public class MainPage extends AppCompatActivity
             return mList.size();
         }
 
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
         class RecyclerViewHolder extends RecyclerView.ViewHolder {
             private View itemView;
             private ImageView imageView;
@@ -303,14 +329,19 @@ public class MainPage extends AppCompatActivity
         }
     }
 
-    public void updateGridView(final ArrayList<HashMap<String, String>> list) {
+    public void updateGridView(final HashMap<String, String> map) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mList.addAll(list);
+                mList.add(map);
                 mRecyclerViewAdapter.notifyDataSetChanged();
             }
         });
+    }
+
+    public void updateSearchPercentage(int percentage) {
+        ProgressBar progressBar = findViewById(R.id.search_progress);
+        progressBar.setProgress(percentage);
     }
 
     public boolean getInSearchStatus() {

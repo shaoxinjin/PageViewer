@@ -1,4 +1,4 @@
-package com.shaoxinjin.pageviewer.websites.zhuotu;
+package com.shaoxinjin.pageviewer.websites.xixi;
 
 import com.shaoxinjin.pageviewer.MainPage;
 import com.shaoxinjin.pageviewer.Util;
@@ -11,8 +11,8 @@ import org.jsoup.select.Elements;
 import java.util.HashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
-public class Zhuotu extends BaseWebOperation {
-    public Zhuotu(MainPage mainPage, ThreadPoolExecutor threadPoolExecutor) {
+public class Xixi extends BaseWebOperation {
+    public Xixi(MainPage mainPage, ThreadPoolExecutor threadPoolExecutor) {
         super(mainPage, threadPoolExecutor);
     }
 
@@ -23,43 +23,32 @@ public class Zhuotu extends BaseWebOperation {
 
     @Override
     public void initWebInfo() {
-        URL_BASE = "http://m.win4000.com";
+        URL_BASE = "http://m.xmkkzy.net";
         URL_END = ".html";
         mSectionInfo = new SectionInfo[]{
-                new SectionInfo("/meitu_2_", 1, 0),
-                new SectionInfo("/meitu_3_", 1, 0),
-                new SectionInfo("/meitu_4_", 1, 0),
-                new SectionInfo("/meitu_29_", 1, 0),
-                new SectionInfo("/meitu_31_", 1, 0),
-                new SectionInfo("/meitu_32_", 1, 0),
-                new SectionInfo("/meitu_47_", 1, 0),
-                new SectionInfo("/meitu_59_", 1, 0)};
-        mWebOperationView = new ZhuotuView();
+            new SectionInfo("/44rtnet/sy/list_1_", 1, 0),
+            new SectionInfo("/44rtnet/xz/list_2_", 1, 0),
+            new SectionInfo("/44rtnet/zg/list_3_", 1, 0),
+            new SectionInfo("/44rtnet/rb/list_4_", 1, 0),
+            new SectionInfo("/44rtnet/ddrtys/list_5_", 1, 0)};
+        mWebOperationView = new XixiView();
     }
 
     @Override
     public int getTotalPageNum(String url) throws Exception {
         Document doc = Util.getDocument(url);
-        Element element = doc.select("div.ym a").last();
-        if (element != null) {
-            String href = element.attr("href");
-            return Integer.valueOf(href.split(".html")[0].split("_")[2]);
-        }
-        return 0;
+        String pageNum = doc.selectFirst("span.pageinfo strong").text();
+        return pageNum == null ? 0 : Integer.valueOf(pageNum);
     }
 
     @Override
     public void setListFromHtmlTable(String url, String s) throws Exception {
         Document doc = Util.getDocument(url);
-        Elements aTags = doc.select("div.img_cont a");
+        Elements aTags = doc.select("div.libox a");
         for (Element e : aTags) {
             String href = e.attr("href");
             Element img = e.selectFirst("img");
             if (img != null) {
-                String imgSrc = img.attr("data-original");
-                if (imgSrc == null || imgSrc.equals("")) {
-                    continue;
-                }
                 String name = img.attr("alt");
                 HashMap<String, String> map = new HashMap<>();
                 map.put(MainPage.TEXT_KEY, Util.getCommonName(name));
@@ -69,9 +58,10 @@ public class Zhuotu extends BaseWebOperation {
                 if (!s.equals("") && !map.get(MainPage.TEXT_KEY).contains(s)) {
                     continue;
                 }
+                String imgSrc = img.attr("src");
                 map.put(MainPage.IMAGE_KEY, imgSrc);
-                map.put(MainPage.URL_KEY, href);
-                map.put(MainPage.TYPE_KEY, Zhuotu.class.getSimpleName());
+                map.put(MainPage.URL_KEY, URL_BASE + href);
+                map.put(MainPage.TYPE_KEY, Xixi.class.getSimpleName());
                 mMainPage.updateGridView(map);
             }
         }

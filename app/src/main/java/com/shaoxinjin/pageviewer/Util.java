@@ -15,7 +15,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import java.io.FileOutputStream;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
@@ -25,7 +24,19 @@ public class Util {
     private static final String TAG = PREFIX + Util.class.getSimpleName();
 
     public static Document getDocument(String path) throws Exception {
-        return Jsoup.parse(new URL(path), 5000);
+        Document document = null;
+        for (int i = 0; i < 5; i++) {
+            try {
+                document = Jsoup.connect(path).timeout(3000).get();
+                break;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        if (document == null) {
+            throw new Exception("getDocument retry several times, but failed.");
+        }
+        return document;
     }
 
     public static String getCommonPageUrl(String firstPicUrl, int pageNum) {
@@ -33,7 +44,7 @@ public class Util {
         if (pageNum == 1) {
             currentPage = firstPicUrl;
         } else {
-            currentPage = firstPicUrl.replace(".html", "_" + String.valueOf(pageNum) + ".html");
+            currentPage = firstPicUrl.replace(".html", "_" + pageNum + ".html");
         }
         return currentPage;
     }
@@ -48,7 +59,11 @@ public class Util {
 
     static void setPicFromUrl(Context context, String url, ImageView imageView) {
         RequestOptions options = new RequestOptions().placeholder(R.drawable.ic_loading);
-        Glide.with(context).load(url).apply(options).into(imageView);
+        if (url.endsWith("gif")) {
+            Glide.with(context).asGif().load(url).apply(options).into(imageView);
+        } else {
+            Glide.with(context).load(url).apply(options).into(imageView);
+        }
     }
 
     static void downloadPic(final ViewPage viewPage, String url) {

@@ -18,16 +18,16 @@ public class SemanhuaView implements WebOperationView {
     }
 
     @Override
-    public String getPicUrl(String firstPicUrl, int pageNum) throws Exception {
+    public String[] getPicUrl(String firstPicUrl, int pageNum) throws Exception {
         String currentPage = Util.getCommonPageUrl(firstPicUrl, pageNum);
         Document doc = Util.getDocument(currentPage);
         if (pageNum == 1) {
             totalPicNum = getTotalPicNum(doc);
         }
         if (totalPicNum < pageNum) {
-            return "";
+            return null;
         }
-        return doc.selectFirst("div.box img").attr("src");
+        return new String[]{doc.selectFirst("div.box img").attr("src").trim()};
     }
 
     @Override

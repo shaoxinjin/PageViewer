@@ -1,18 +1,17 @@
-package com.shaoxinjin.pageviewer.websites.mhxxoo;
+package com.shaoxinjin.pageviewer.websites.xixi;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import com.shaoxinjin.pageviewer.Util;
 import com.shaoxinjin.pageviewer.websites.WebOperationView;
-
 import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
-public class MhxxooView implements WebOperationView {
+public class XixiView implements WebOperationView {
     private int totalPicNum = Integer.MAX_VALUE;
 
     private int getTotalPicNum(Document doc) {
-        String picNum = doc.selectFirst("ul.page11list a").text();
+        String picNum = doc.selectFirst("div.article_page ul a").text();
         /* format is "共xx页" */
         return picNum == null ? 0 : Integer.valueOf(picNum.split("页")[0].split("共")[1]);
     }
@@ -27,7 +26,12 @@ public class MhxxooView implements WebOperationView {
         if (totalPicNum < pageNum) {
             return null;
         }
-        return new String[]{doc.selectFirst("div.pic img").attr("src").trim()};
+        Elements elements = doc.select("div.arcmain img");
+        String[] srcs = new String[elements.size()];
+        for (int i = 0; i < srcs.length; i++) {
+            srcs[i] = elements.get(i).attr("src").trim();
+        }
+        return srcs;
     }
 
     @Override
@@ -39,15 +43,15 @@ public class MhxxooView implements WebOperationView {
     public void writeToParcel(Parcel parcel, int i) {
     }
 
-    public static final Parcelable.Creator<MhxxooView> CREATOR = new Creator<MhxxooView>() {
+    public static final Parcelable.Creator<XixiView> CREATOR = new Creator<XixiView>() {
         @Override
-        public MhxxooView createFromParcel(Parcel source) {
-            return new MhxxooView();
+        public XixiView createFromParcel(Parcel source) {
+            return new XixiView();
         }
 
         @Override
-        public MhxxooView[] newArray(int size) {
-            return new MhxxooView[size];
+        public XixiView[] newArray(int size) {
+            return new XixiView[size];
         }
     };
 }

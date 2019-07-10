@@ -20,16 +20,14 @@ public class Star implements WebOperation {
         DbManager dbManager = DbManager.getInstance(mMainPage);
         ArrayList<DbStarRecord> list = dbManager.queryRecords();
 
-        ArrayList<HashMap<String, String>> starSets = new ArrayList<>();
         for (DbStarRecord record : list) {
             HashMap<String, String> map = new HashMap<>();
             map.put(MainPage.TYPE_KEY, record.type);
             map.put(MainPage.IMAGE_KEY, record.picUrl);
             map.put(MainPage.TEXT_KEY, record.name);
             map.put(MainPage.URL_KEY, record.url);
-            starSets.add(map);
+            mMainPage.updateGridView(map);
         }
-        mMainPage.updateGridView(starSets);
     }
 
     @Override

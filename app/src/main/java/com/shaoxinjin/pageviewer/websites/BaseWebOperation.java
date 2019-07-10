@@ -1,21 +1,18 @@
 package com.shaoxinjin.pageviewer.websites;
 
 import android.util.Log;
-
 import com.shaoxinjin.pageviewer.MainPage;
 import com.shaoxinjin.pageviewer.Util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class BaseWebOperation implements WebOperation {
     private static final String TAG = Util.PREFIX + BaseWebOperation.class.getSimpleName();
     protected String URL_BASE;
     protected String URL_END;
-    protected SectionInfo mSectionInfo[];
+    protected SectionInfo[] mSectionInfo;
     protected WebOperationView mWebOperationView;
-    private MainPage mMainPage;
+    protected MainPage mMainPage;
     private ThreadPoolExecutor mThreadPoolExecutor;
 
     public BaseWebOperation(MainPage mainPage, ThreadPoolExecutor threadPoolExecutor) {
@@ -86,11 +83,7 @@ public class BaseWebOperation implements WebOperation {
             public void run() {
                 try {
                     if (sectionInfo.mCurrentPageNum <= 3 || sectionInfo.mCurrentPageNum <= sectionInfo.mTotalPageNum) {
-                        ArrayList<HashMap<String, String>> list = new ArrayList<>();
-                        setListFromHtmlTable(url, list, "");
-                        if (list.size() > 0) {
-                            mMainPage.updateGridView(list);
-                        }
+                        setListFromHtmlTable(url, "");
                     }
                 } catch (Exception e) {
                     Log.d(TAG, "exception in updateSectionPage is " + e.getClass());
@@ -107,21 +100,16 @@ public class BaseWebOperation implements WebOperation {
     private void searchSectionPage(final String s, final SectionInfo sectionInfo) {
         for (int pageNum = 1; pageNum <= sectionInfo.mTotalPageNum; pageNum++) {
             final int tempPageNum = pageNum;
+            mMainPage.updateSearchPercentage(pageNum * 100 / sectionInfo.mTotalPageNum);
             mThreadPoolExecutor.execute(new Runnable() {
                 @Override
                 public void run() {
-                    if (mMainPage.getInSearchStatus()) {
-                        try {
-                            String url = URL_BASE + sectionInfo.mUrlMid + String.valueOf(tempPageNum) + URL_END;
-                            ArrayList<HashMap<String, String>> list = new ArrayList<>();
-                            setListFromHtmlTable(url, list, s);
-                            if (list.size() > 0) {
-                                mMainPage.updateGridView(list);
-                            }
-                        } catch (Exception e) {
-                            Log.d(TAG, "exception in searchSectionPage is " + e.getClass());
-                            e.printStackTrace();
-                        }
+                    try {
+                        String url = URL_BASE + sectionInfo.mUrlMid + tempPageNum + URL_END;
+                        setListFromHtmlTable(url, s);
+                    } catch (Exception e) {
+                        Log.d(TAG, "exception in searchSectionPage is " + e.getClass());
+                        e.printStackTrace();
                     }
                 }
             });
@@ -136,9 +124,9 @@ public class BaseWebOperation implements WebOperation {
     }
 
     public String getUrlForPage(SectionInfo sectionInfo) {
-        return URL_BASE + sectionInfo.mUrlMid + String.valueOf(sectionInfo.mCurrentPageNum) + URL_END;
+        return URL_BASE + sectionInfo.mUrlMid + sectionInfo.mCurrentPageNum + URL_END;
     }
 
-    public void setListFromHtmlTable(String url, ArrayList<HashMap<String, String>> list, String s) throws Exception {
+    public void setListFromHtmlTable(String url, String s) throws Exception {
     }
 }

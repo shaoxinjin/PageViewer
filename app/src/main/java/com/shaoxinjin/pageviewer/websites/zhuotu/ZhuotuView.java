@@ -17,16 +17,16 @@ public class ZhuotuView implements WebOperationView {
     }
 
     @Override
-    public String getPicUrl(String firstPicUrl, int pageNum) throws Exception {
+    public String[] getPicUrl(String firstPicUrl, int pageNum) throws Exception {
         String currentPage = Util.getCommonPageUrl(firstPicUrl, pageNum);
         Document doc = Util.getDocument(currentPage);
         if (pageNum == 2) {
             totalPicNum = getTotalPicNum(doc);
         }
         if (totalPicNum < pageNum) {
-            return "";
+            return null;
         }
-        return doc.selectFirst("div.xq_cont img").attr("src");
+        return new String[]{doc.selectFirst("div.xq_cont img").attr("src").trim()};
     }
 
     @Override

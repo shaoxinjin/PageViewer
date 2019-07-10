@@ -21,6 +21,8 @@ import com.shaoxinjin.pageviewer.db.DbManager;
 import com.shaoxinjin.pageviewer.websites.WebOperationView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -118,12 +120,11 @@ public class ViewPage extends AppCompatActivity {
                 try {
                     for (int i = 1; i <= 3; i++) {
                         mCurrentPage++;
-                        ArrayList<String> list = new ArrayList<>();
-                        String picUrl = mWebOperationView.getPicUrl(mCurrentUrl, mCurrentPage);
-                        if (picUrl == null || picUrl.equals("")) {
+                        String[] picUrl = mWebOperationView.getPicUrl(mCurrentUrl, mCurrentPage);
+                        if (picUrl == null) {
                             return;
                         }
-                        list.add(picUrl);
+                        List<String> list = Arrays.asList(picUrl);
                         updateListView(list);
                     }
                 } catch (Exception e) {
@@ -179,7 +180,7 @@ public class ViewPage extends AppCompatActivity {
         }
     }
 
-    public void updateListView(final ArrayList<String> list) {
+    public void updateListView(final List<String> list) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

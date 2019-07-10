@@ -9,7 +9,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -42,23 +41,27 @@ public class Mhxxoo extends BaseWebOperation {
     }
 
     @Override
-    public void setListFromHtmlTable(String url, ArrayList<HashMap<String, String>> list, String s) throws Exception {
+    public void setListFromHtmlTable(String url, String s) throws Exception {
         Document doc = Util.getDocument(url);
         Elements aTags = doc.select("div.news a");
         for (Element e : aTags) {
             String href = e.attr("href");
             Element img = e.selectFirst("img");
             if (img != null) {
-                String imgSrc = img.attr("src");
                 String name = img.attr("alt");
                 HashMap<String, String> map = new HashMap<>();
-                map.put(MainPage.IMAGE_KEY, imgSrc);
                 map.put(MainPage.TEXT_KEY, Util.getCommonName(name));
+                if (s.equals("") && mMainPage.getInSearchStatus()) {
+                    return;
+                }
+                if (!s.equals("") && !map.get(MainPage.TEXT_KEY).contains(s)) {
+                    continue;
+                }
+                String imgSrc = img.attr("src");
+                map.put(MainPage.IMAGE_KEY, imgSrc);
                 map.put(MainPage.URL_KEY, URL_BASE + href);
                 map.put(MainPage.TYPE_KEY, Mhxxoo.class.getSimpleName());
-                if (s.equals("") || map.get(MainPage.TEXT_KEY).contains(s)) {
-                    list.add(map);
-                }
+                mMainPage.updateGridView(map);
             }
         }
     }

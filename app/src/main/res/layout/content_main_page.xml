@@ -8,10 +8,19 @@
     tools:context=".MainPage"
     tools:showIn="@layout/app_bar_main_page">
 
+    <ProgressBar
+        android:id="@+id/search_progress"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        style="?android:attr/progressBarStyleHorizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        android:max="100" />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/content_grid_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="@id/search_progress">
     </android.support.v7.widget.RecyclerView>
 
 </android.support.constraint.ConstraintLayout>

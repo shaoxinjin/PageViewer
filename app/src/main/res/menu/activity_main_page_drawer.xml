@@ -22,4 +22,14 @@
         android:icon="@drawable/ic_sites"
         android:title="@string/zhuotu_site" >
     </item>
+    <item
+        android:id="@+id/nav_xixi"
+        android:icon="@drawable/ic_sites"
+        android:title="@string/xixi_site" >
+    </item>
+    <item
+        android:id="@+id/nav_wuzhi"
+        android:icon="@drawable/ic_sites"
+        android:title="@string/wuzhi_site" >
+    </item>
 </menu>

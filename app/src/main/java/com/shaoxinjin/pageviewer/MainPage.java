@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -26,6 +25,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.shaoxinjin.pageviewer.db.DbManager;
 import com.shaoxinjin.pageviewer.websites.Star;
 import com.shaoxinjin.pageviewer.websites.WebOperation;
@@ -112,7 +112,7 @@ public class MainPage extends AppCompatActivity
     }
 
     @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+    public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         if (mCurrentID == item.getItemId()) {
             return true;
@@ -197,7 +197,7 @@ public class MainPage extends AppCompatActivity
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 if (!inSearch && isNotStarPage() && mWebOperation != null) {
                     Log.d(TAG, "onScrollStateChanged");
                     if (!recyclerView.canScrollVertically(-1)) {
@@ -234,13 +234,13 @@ public class MainPage extends AppCompatActivity
         }
 
         @Override
-        public @NonNull RecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public RecyclerViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(mAdapterContext).inflate(R.layout.grid_item, parent, false);
             return new RecyclerViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull RecyclerViewHolder viewHolder, int position) {
+        public void onBindViewHolder(RecyclerViewHolder viewHolder, int position) {
             HashMap<String, String> map = mList.get(position);
             if (map == null) {
                 Log.d(TAG, "map is null");

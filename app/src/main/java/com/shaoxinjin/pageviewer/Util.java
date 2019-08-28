@@ -3,14 +3,15 @@ package com.shaoxinjin.pageviewer;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Environment;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -69,7 +70,7 @@ public class Util {
     static void downloadPic(final ViewPage viewPage, String url) {
         Glide.with(viewPage).asBitmap().load(url).into(new SimpleTarget<Bitmap>() {
             @Override
-            public void onResourceReady(@NonNull Bitmap bitmap, Transition<? super Bitmap> transition) {
+            public void onResourceReady(Bitmap bitmap, Transition<? super Bitmap> transition) {
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss", Locale.CHINA);
                 Calendar calendar = Calendar.getInstance();
                 final String name = Environment.getExternalStorageDirectory().getPath() + "/PageViewer/" + df.format(calendar.getTime()) + ".jpg";

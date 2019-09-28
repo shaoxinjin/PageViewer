@@ -30,7 +30,6 @@ import com.shaoxinjin.pageviewer.db.DbManager;
 import com.shaoxinjin.pageviewer.websites.Star;
 import com.shaoxinjin.pageviewer.websites.WebOperation;
 import com.shaoxinjin.pageviewer.websites.WebOperationView;
-import com.shaoxinjin.pageviewer.websites.Wuzhi.Wuzhi;
 import com.shaoxinjin.pageviewer.websites.mhxxoo.Mhxxoo;
 import com.shaoxinjin.pageviewer.websites.semanhua.Semanhua;
 import com.shaoxinjin.pageviewer.websites.xixi.Xixi;
@@ -151,8 +150,6 @@ public class MainPage extends AppCompatActivity
                 return Zhuotu.class.getSimpleName();
             case R.id.nav_xixi:
                 return Xixi.class.getSimpleName();
-            case R.id.nav_wuzhi:
-                return Wuzhi.class.getSimpleName();
         }
         return "";
     }
@@ -164,7 +161,6 @@ public class MainPage extends AppCompatActivity
         webOperationMap.put(Semanhua.class.getSimpleName(), new Semanhua(MainPage.this, mThreadPoolExecutor));
         webOperationMap.put(Zhuotu.class.getSimpleName(), new Zhuotu(MainPage.this, mThreadPoolExecutor));
         webOperationMap.put(Xixi.class.getSimpleName(), new Xixi(MainPage.this, mThreadPoolExecutor));
-        webOperationMap.put(Wuzhi.class.getSimpleName(), new Wuzhi(MainPage.this, mThreadPoolExecutor));
     }
 
     private void initSearchView(MenuItem menuItem) {

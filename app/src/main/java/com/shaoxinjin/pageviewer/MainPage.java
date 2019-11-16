@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -74,6 +75,17 @@ public class MainPage extends AppCompatActivity
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!inSearch && isNotStarPage() && mWebOperation != null) {
+                    Log.d(TAG, "fab onclick updatePage");
+                    mWebOperation.updatePage();
+                }
+            }
+        });
 
         int REQUEST_CODE_CONTACT = 101;
         String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE};
@@ -191,18 +203,6 @@ public class MainPage extends AppCompatActivity
         int column = getResources().getInteger(R.integer.grid_columns);
         final StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(column, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if (!inSearch && isNotStarPage() && mWebOperation != null) {
-                    Log.d(TAG, "onScrollStateChanged");
-                    if (!recyclerView.canScrollVertically(-1)) {
-                        Log.d(TAG, "onScrollStateChanged updatePage");
-                        mWebOperation.updatePage();
-                    }
-                }
-            }
-        });
         registerForContextMenu(recyclerView);
         if (mThreadPoolExecutor == null) {
             mThreadPoolExecutor = new ThreadPoolExecutor(50, 200, 5,
